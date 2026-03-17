@@ -1,0 +1,51 @@
+name: Super Realistic 70 Days Activity
+
+on:
+  workflow_dispatch:
+
+jobs:
+  backdate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create 70 Days Activity
+        run: |
+          set -e  # xatolik bo‘lsa darhol to‘xtaydi
+
+          git config user.email "madaminovulugbek2011@gmail.com"
+          git config user.name "Ulug`bek"
+
+          for i in $(seq 70 -1 1)
+          do
+            DAY_OF_WEEK=$(date -d "$i days ago" +%u)
+            CHANCE=$((RANDOM % 100))
+
+            THRESHOLD=35
+            if [ "$DAY_OF_WEEK" -ge 6 ]; then
+              THRESHOLD=85
+            fi
+
+            if [ "$CHANCE" -gt "$THRESHOLD" ]; then
+              RANDOM_COUNT=$((1 + RANDOM % 15))
+
+              for j in $(seq 1 $RANDOM_COUNT)
+              do
+                D=$(date -d "$i days ago" +%Y-%m-%dT%H:%M:%S)
+
+                echo "Update for $D - Rand: $RANDOM" > activity.txt
+                git add activity.txt
+
+                GIT_AUTHOR_DATE="$D" GIT_COMMITTER_DATE="$D" \
+                git commit -m "Fixing module $j on $D" || true
+              done
+            fi
+          done
+
+      - name: Push changes
+        run: |
+          git push origin main
